@@ -1,0 +1,3 @@
+# Large generated outputs (exceed GitHub 100 MB limit)
+outputs/spec_gpt.jsonl
+outputs/envs_gpt.jsonl

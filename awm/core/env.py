@@ -8,7 +8,6 @@ import os
 import subprocess
 import shutil
 import time
-import signal
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import sys
 from awm.tools import tools_robust_json_loads, normalize_scenario_name, format_db_schema, tools_token_count, wait_port_free, wait_for_server, get_random_available_port, tools_jsonl_save, tools_jsonl_load
@@ -188,7 +187,7 @@ def test_run_specific_env(idx: int, env_config: dict) -> tuple[bool, str, dict]:
             logger.error(f"{scenario_name} Server failed to start on port {port} (timeout after 30s)")
             
             try:
-                os.killpg(os.getpgid(server_process.pid), signal.SIGTERM)
+                server_process.terminate()
             except ProcessLookupError:
                 pass
 
@@ -196,7 +195,7 @@ def test_run_specific_env(idx: int, env_config: dict) -> tuple[bool, str, dict]:
                 stdout, _ = server_process.communicate(timeout=5)
             except subprocess.TimeoutExpired:
                 try:
-                    os.killpg(os.getpgid(server_process.pid), signal.SIGKILL)
+                    server_process.kill()
                 except ProcessLookupError:
                     pass
                 stdout, _ = server_process.communicate()
@@ -212,7 +211,7 @@ def test_run_specific_env(idx: int, env_config: dict) -> tuple[bool, str, dict]:
         logger.info(f"{scenario_name} Server started successfully on port {port}")
         
         try:
-            os.killpg(os.getpgid(server_process.pid), signal.SIGTERM)
+            server_process.terminate()
         except ProcessLookupError:
             pass
             
@@ -220,7 +219,7 @@ def test_run_specific_env(idx: int, env_config: dict) -> tuple[bool, str, dict]:
             server_process.wait(timeout=5)
         except subprocess.TimeoutExpired:
             try:
-                os.killpg(os.getpgid(server_process.pid), signal.SIGKILL)
+                server_process.kill()
             except ProcessLookupError:
                 pass
             server_process.wait()
